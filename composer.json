@@ -1,0 +1,63 @@
+{
+    "name": "dmarsal90/zipwarden",
+    "description": "Safe ZIP reading and extraction for PHP: protects against zip slip, zip bombs and symlink tricks.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["zip", "security", "zip-slip", "zip-bomb", "extraction", "archive", "laravel"],
+    "homepage": "https://github.com/dmarsal90/zipwarden-php",
+    "authors": [
+        {
+            "name": "David Marsal",
+            "email": "david.marsal@motorflash.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/dmarsal90/zipwarden-php/issues",
+        "source": "https://github.com/dmarsal90/zipwarden-php"
+    },
+    "require": {
+        "php": "^8.2",
+        "ext-zip": "*"
+    },
+    "require-dev": {
+        "illuminate/contracts": "^11.0 || ^12.0 || ^13.0",
+        "illuminate/support": "^11.0 || ^12.0 || ^13.0",
+        "illuminate/translation": "^11.0 || ^12.0 || ^13.0",
+        "laravel/pint": "^1.18",
+        "pestphp/pest": "^3.8",
+        "phpstan/phpstan": "^2.1"
+    },
+    "suggest": {
+        "illuminate/support": "Required only to use the ZipWarden\\Laravel adapter."
+    },
+    "autoload": {
+        "psr-4": {
+            "ZipWarden\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ZipWarden\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "pest",
+        "lint": "pint --test",
+        "format": "pint",
+        "analyse": "phpstan analyse --memory-limit=512M"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "todo": "Confirm the Packagist package name (dmarsal90/zipwarden) before publishing.",
+        "laravel": {
+            "providers": ["ZipWarden\\Laravel\\ZipWardenServiceProvider"]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
