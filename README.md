@@ -30,7 +30,7 @@ follows the same specification.
 composer require dmarsal90/zipwarden
 ```
 
-Requires PHP 8.2+ and `ext-zip`. The package name is provisional.
+Requires PHP 8.2+ with `ext-zip`. Tested on 8.2, 8.3 and 8.4.
 <!-- TODO: confirm the Packagist package name before publishing. -->
 
 ## Planned usage (draft API)
