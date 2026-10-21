@@ -53,7 +53,6 @@
         }
     },
     "extra": {
-        "todo": "Confirm the Packagist package name (dmarsal90/zipwarden) before publishing.",
         "laravel": {
             "providers": ["ZipWarden\\Laravel\\ZipWardenServiceProvider"]
         }
