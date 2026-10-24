@@ -69,6 +69,17 @@ it('accepts an existing empty destination and rejects anything else', function (
     });
 });
 
+it('keeps the mode of an existing destination', function (): void {
+    withWorkDir(function (string $dir): void {
+        $zip = writeZip("$dir/a.zip", [['name' => 'a.txt', 'data' => 'x']]);
+        mkdir("$dir/private", 0700);
+
+        (new ZipWarden)->extract($zip, "$dir/private");
+
+        expect(fileperms("$dir/private") & 07777)->toBe(0700);
+    });
+});
+
 it('removes everything written when a later entry fails', function (): void {
     withWorkDir(function (string $dir): void {
         $zip = writeZip("$dir/a.zip", [
