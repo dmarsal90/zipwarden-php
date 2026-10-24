@@ -33,8 +33,9 @@ final class ZipWarden
                 $files = (new Extraction($this->limits, $work))->run($zip, $entries);
 
                 if ($final !== null) {
-                    // shortcut: renaming over the empty destination replaces the directory itself, so its own mode and owner are lost and POSIX rename semantics are required; revisit for Windows.
-                    if (! chmod($work, 0755) || ! @rename($work, $final)) {
+                    // shortcut: renaming over the empty destination replaces the directory itself, so its owner and group are lost (the mode is kept) and POSIX rename semantics are required; revisit for Windows.
+                    $mode = is_dir($final) ? (fileperms($final) & 07777) : 0755;
+                    if (! chmod($work, $mode) || ! @rename($work, $final)) {
                         throw new ZipWardenException(ErrorCode::IoError);
                     }
                 }
