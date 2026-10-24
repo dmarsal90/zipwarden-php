@@ -48,3 +48,50 @@ function errorCodeOf(callable $fn): ?ErrorCode
 
     return null;
 }
+
+/**
+ * Run $fn with a fresh scratch directory and delete it afterwards.
+ */
+function withWorkDir(callable $fn): void
+{
+    $dir = sys_get_temp_dir().'/zipwarden-test-'.bin2hex(random_bytes(6));
+    mkdir($dir, 0700);
+
+    try {
+        $fn($dir);
+    } finally {
+        removeDir($dir);
+    }
+}
+
+function removeDir(string $path): void
+{
+    if (is_link($path) || ! is_file($path) && ! is_dir($path)) {
+        @unlink($path);
+
+        return;
+    }
+    if (is_dir($path)) {
+        foreach (scandir($path) ?: [] as $item) {
+            if ($item !== '.' && $item !== '..') {
+                removeDir($path.'/'.$item);
+            }
+        }
+        rmdir($path);
+
+        return;
+    }
+    unlink($path);
+}
+
+/**
+ * Write a ZIP built from $entries to $path.
+ *
+ * @param  list<array{name: string, data: string, mode?: int, declaredSize?: int, deflate?: bool}>  $entries
+ */
+function writeZip(string $path, array $entries): string
+{
+    file_put_contents($path, MaliciousZipFactory::build($entries));
+
+    return $path;
+}
