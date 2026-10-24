@@ -50,6 +50,24 @@ final class ZipWarden
         return new ExtractionResult($final ?? $work, $files);
     }
 
+    /**
+     * Run only the pre-scan: names, types, counts and declared sizes, without
+     * writing anything. Headers are untrusted, so passing this does not replace
+     * extract(), whose streaming counters stay authoritative. Failures raise a
+     * ZipWardenException.
+     */
+    public function validate(string $zipPath): void
+    {
+        $scanner = new Scanner($this->limits, $this->policy);
+        $zip = $scanner->open($zipPath);
+
+        try {
+            $scanner->scan($zip, $zipPath);
+        } finally {
+            $zip->close();
+        }
+    }
+
     private function createTemporaryDirectory(): string
     {
         $directory = sys_get_temp_dir().'/zipwarden-'.bin2hex(random_bytes(8));
