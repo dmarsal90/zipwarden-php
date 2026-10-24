@@ -4,7 +4,8 @@ Safe reading and extraction of untrusted ZIP archives (zip slip and zip bomb
 protection). Behaviour is defined in `docs/SPEC.md`, which is identical to the
 one in the `zipwarden-js` sibling project. Change both together.
 
-Status: scaffold only. Extraction logic is not implemented.
+Status: pre-release. Pre-scan, streaming extraction, nested archives and the
+`SafeZip` rule are implemented; no independent security review yet.
 
 ## Commands
 
