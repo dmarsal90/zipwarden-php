@@ -30,7 +30,10 @@ follows the same specification.
 composer require dmarsal90/zipwarden
 ```
 
-Requires PHP 8.2+ with `ext-zip`. Tested on 8.2, 8.3 and 8.4.
+Requires PHP 8.2+ with `ext-zip`. Tested on 8.2, 8.3, 8.4 and 8.5.
+
+Use a PHP build that includes the October 2026 security fixes (CVE-2026-109618
+and CVE-2026-109619): 8.2.35, 8.3.36, 8.4.27, 8.5.12 or later.
 <!-- TODO: confirm the Packagist package name before publishing. -->
 
 ## Planned usage (draft API)
