@@ -24,7 +24,7 @@ final class Scanner
 
     private const UNIX_SYMLINK = 0120000;
 
-    private const RATIO_MIN_BYTES = 1024 * 1024;
+    public const RATIO_MIN_BYTES = 1024 * 1024;
 
     public function __construct(
         private readonly Limits $limits,
