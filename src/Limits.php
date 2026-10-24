@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ZipWarden;
 
+use InvalidArgumentException;
+
 /**
  * Extraction limits. Defaults and their reasons: docs/SPEC.md, section 2.
  */
@@ -18,5 +20,9 @@ final readonly class Limits
         public int $maxDepth = 16,
         public int $maxNestingDepth = 0,
         public int $timeoutSeconds = 30,
-    ) {}
+    ) {
+        if ($maxNestingDepth < 0 || $maxNestingDepth > 2) {
+            throw new InvalidArgumentException('maxNestingDepth must be between 0 and 2.');
+        }
+    }
 }

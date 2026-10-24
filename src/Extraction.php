@@ -24,13 +24,18 @@ final class Extraction
 
     private int $total = 0;
 
+    private int $entryCount = 0;
+
+    /** Archive levels below the top one that are being inspected. */
+    private int $depth = 0;
+
     /** @var list<string> */
     private array $files = [];
 
     /**
      * @param  string  $root  Existing, empty directory that only this extraction writes to.
      */
-    public function __construct(private readonly Limits $limits, string $root)
+    public function __construct(private readonly Limits $limits, private readonly Policy $policy, string $root)
     {
         $real = realpath($root);
         if ($real === false) {
@@ -48,6 +53,8 @@ final class Extraction
      */
     public function run(ZipArchive $zip, array $entries): array
     {
+        $this->countEntries($entries);
+
         foreach ($entries as $entry) {
             $this->checkTime();
 
@@ -79,7 +86,7 @@ final class Extraction
         }
 
         try {
-            $this->copy($input, $output, $entry);
+            $isZip = $this->copy($input, $output, $entry);
         } finally {
             fclose($input);
             fclose($output);
@@ -88,18 +95,95 @@ final class Extraction
         if (! chmod($target, 0644)) {
             throw new ZipWardenException(ErrorCode::IoError);
         }
+        if ($isZip) {
+            $this->inspect($target);
+        }
         $this->files[] = $entry->path;
+    }
+
+    /**
+     * Checks an archive nested inside the one being extracted, with the same limits
+     * and the shared totals. Its content is counted but not written anywhere.
+     */
+    private function inspect(string $path): void
+    {
+        $scanner = new Scanner($this->limits, $this->policy);
+        $zip = $scanner->open($path);
+        $this->depth++;
+
+        try {
+            $entries = $scanner->scan($zip, $path);
+            $this->countEntries($entries);
+
+            foreach ($entries as $entry) {
+                $this->checkTime();
+                if (! $entry->isDirectory) {
+                    $this->inspectEntry($zip, $entry);
+                }
+            }
+        } finally {
+            $this->depth--;
+            $zip->close();
+        }
+    }
+
+    private function inspectEntry(ZipArchive $zip, ScannedEntry $entry): void
+    {
+        $input = $zip->getStreamIndex($entry->index);
+        if ($input === false) {
+            throw new ZipWardenException(ErrorCode::InvalidArchive);
+        }
+
+        // A scratch file is only needed when this entry may itself be a nested archive.
+        $scratch = $this->depth < $this->limits->maxNestingDepth ? tmpfile() : null;
+        if ($scratch === false) {
+            fclose($input);
+            throw new ZipWardenException(ErrorCode::IoError);
+        }
+
+        try {
+            $isZip = $this->copy($input, $scratch, $entry);
+            if ($isZip && $scratch !== null) {
+                fflush($scratch);
+                $meta = stream_get_meta_data($scratch);
+                if (! isset($meta['uri'])) {
+                    throw new ZipWardenException(ErrorCode::IoError);
+                }
+                $this->inspect($meta['uri']);
+            }
+        } finally {
+            fclose($input);
+            if ($scratch !== null) {
+                fclose($scratch);
+            }
+        }
+    }
+
+    /**
+     * Entries of every level count against the same maxEntries.
+     *
+     * @param  list<ScannedEntry>  $entries
+     */
+    private function countEntries(array $entries): void
+    {
+        $this->entryCount += count($entries);
+        if ($this->entryCount > $this->limits->maxEntries) {
+            throw new UnsafeArchiveException(ErrorCode::TooManyEntries);
+        }
     }
 
     /**
      * Counts the bytes actually produced; the sizes in the headers are not trusted.
      *
      * @param  resource  $input
-     * @param  resource  $output
+     * @param  resource|null  $output  Null counts the bytes without writing them.
+     * @return bool Whether the content is itself a ZIP archive.
      */
-    private function copy($input, $output, ScannedEntry $entry): void
+    private function copy($input, $output, ScannedEntry $entry): bool
     {
         $produced = 0;
+        $head = '';
+        $isZip = false;
         $crc = hash_init('crc32b');
 
         while (! feof($input)) {
@@ -130,7 +214,15 @@ final class Extraction
                 throw new UnsafeArchiveException(ErrorCode::SizeMismatch);
             }
 
-            if (fwrite($output, $chunk) !== $length) {
+            if (strlen($head) < 4) {
+                $head .= substr($chunk, 0, 4 - strlen($head));
+                $isZip = $head === "PK\x03\x04" || $head === "PK\x05\x06";
+                if ($isZip && $this->depth >= $this->limits->maxNestingDepth) {
+                    throw new UnsafeArchiveException(ErrorCode::NestedArchive);
+                }
+            }
+
+            if ($output !== null && fwrite($output, $chunk) !== $length) {
                 throw new ZipWardenException(ErrorCode::IoError);
             }
             hash_update($crc, $chunk);
@@ -139,6 +231,8 @@ final class Extraction
         if ($produced !== $entry->size || hexdec(hash_final($crc)) !== $entry->crc) {
             throw new UnsafeArchiveException(ErrorCode::SizeMismatch);
         }
+
+        return $isZip;
     }
 
     /**

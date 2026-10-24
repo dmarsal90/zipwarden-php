@@ -30,7 +30,7 @@ final class ZipWarden
                 : $this->createStagingDirectory($destination);
 
             try {
-                $files = (new Extraction($this->limits, $work))->run($zip, $entries);
+                $files = (new Extraction($this->limits, $this->policy, $work))->run($zip, $entries);
 
                 if ($final !== null) {
                     // shortcut: renaming over the empty destination replaces the directory itself, so its owner and group are lost (the mode is kept) and POSIX rename semantics are required; revisit for Windows.
