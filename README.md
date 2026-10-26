@@ -29,7 +29,7 @@ follows the same specification.
 ## Installation
 
 ```bash
-composer require dmarsal90/zipwarden
+composer require dmarsal90/zipwarden:^0.1@alpha
 ```
 
 Requires PHP 8.2+ with `ext-zip`. Tested on 8.2, 8.3, 8.4 and 8.5.
