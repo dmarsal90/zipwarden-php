@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0-alpha.1] - 2026-10-26
+
 ### Added
 
 - Pre-scan of the central directory: raw entry names, types, encryption,
