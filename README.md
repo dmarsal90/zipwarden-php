@@ -18,9 +18,10 @@ or CPU.
 - Extract as a stream into a private staging directory and move it to the
   destination only when every entry passed. Any failure deletes everything
   written. An optional allowlist restricts file extensions.
-- Work with any framework. An optional Laravel adapter (service provider and
-  validation rule) lives in the separate `ZipWarden\Laravel` namespace, and the
-  core never depends on Laravel.
+- Work with any framework. Optional adapters live in their own namespaces: a
+  Laravel one (service provider and validation rule) in `ZipWarden\Laravel` and
+  a Symfony one (validation constraint) in `ZipWarden\Symfony`. The core never
+  depends on either.
 
 The exact behaviour, default limits and error codes are in
 [docs/SPEC.md](docs/SPEC.md). The [JavaScript package](https://github.com/dmarsal90/zipwarden-js)
@@ -87,6 +88,31 @@ uploads, not a substitute for extracting with `ZipWarden`: an archive whose
 headers lie about its sizes passes the rule and is stopped by `extract()`. The
 rule accepts uploaded files only and never treats a string as a path. Pass your
 own `new SafeZip(new ZipWarden($limits, $policy))` to change the limits.
+
+Symfony validation constraint (needs `symfony/validator` 7.4 or 8):
+
+```php
+use Symfony\Component\Validator\Constraints as Assert;
+use ZipWarden\Symfony\Constraints\SafeZip;
+
+class UploadDto
+{
+    #[Assert\NotBlank]
+    #[SafeZip]
+    public ?UploadedFile $archive = null;
+}
+```
+
+It is the same pre-scan as the Laravel rule, with the same limits and the same
+caveat, and it only accepts uploaded files. Empty values are left to `NotBlank`.
+To change the limits, register the validator with your own `ZipWarden`:
+
+```yaml
+services:
+    ZipWarden\Symfony\Constraints\SafeZipValidator:
+        arguments: ['@app.zip_warden']
+        tags: ['validator.constraint_validator']
+```
 
 ## Threats covered
 

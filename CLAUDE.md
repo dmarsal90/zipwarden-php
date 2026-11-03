@@ -17,8 +17,9 @@ Status: pre-release. Pre-scan, streaming extraction, nested archives and the
 ## Conventions
 
 - PHP 8.2+, `declare(strict_types=1)` in every file, PSR-4 (`ZipWarden\`).
-- The core in `src/` must not import Laravel. Laravel code lives only in
-  `src/Laravel` (namespace `ZipWarden\Laravel`).
+- The core in `src/` must not import Laravel or Symfony. Framework code lives
+  only in `src/Laravel` (`ZipWarden\Laravel`) and `src/Symfony`
+  (`ZipWarden\Symfony`).
 - Use `ZipArchive` with streams; never read a whole entry into memory.
 - Errors are `ZipWarden\Exception\ZipWardenException` carrying an `ErrorCode`.
   Codes are stable; messages are not.

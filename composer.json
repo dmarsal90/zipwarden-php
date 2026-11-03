@@ -3,7 +3,7 @@
     "description": "Safe ZIP reading and extraction for PHP: protects against zip slip, zip bombs and symlink tricks.",
     "type": "library",
     "license": "MIT",
-    "keywords": ["zip", "security", "zip-slip", "zip-bomb", "extraction", "archive", "laravel"],
+    "keywords": ["zip", "security", "zip-slip", "zip-bomb", "extraction", "archive", "laravel", "symfony"],
     "homepage": "https://github.com/dmarsal90/zipwarden-php",
     "authors": [
         {
@@ -25,10 +25,13 @@
         "illuminate/translation": "^11.0 || ^12.0 || ^13.0",
         "laravel/pint": "^1.18",
         "pestphp/pest": "^3.8",
-        "phpstan/phpstan": "^2.1"
+        "phpstan/phpstan": "^2.1",
+        "symfony/http-foundation": "^7.4 || ^8.0",
+        "symfony/validator": "^7.4 || ^8.0"
     },
     "suggest": {
-        "illuminate/support": "Required only to use the ZipWarden\\Laravel adapter."
+        "illuminate/support": "Required only to use the ZipWarden\\Laravel adapter.",
+        "symfony/validator": "Required only to use the ZipWarden\\Symfony constraint (7.4 or 8)."
     },
     "autoload": {
         "psr-4": {
