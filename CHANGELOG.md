@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0-alpha.2] - 2026-11-03
+
 ### Added
 
 - Symfony `SafeZip` validation constraint (`ZipWarden\Symfony\Constraints`), tested
